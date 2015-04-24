@@ -27,6 +27,7 @@
     "css-loader": "^0.11.2",
     "file-loader": "^0.8.1",
     "hjs-webpack": "^1.8.0",
+    "local-links": "^1.4.0",
     "react": "^0.13.2",
     "react-hot-loader": "^1.2.5",
     "style-loader": "^0.11.0",
