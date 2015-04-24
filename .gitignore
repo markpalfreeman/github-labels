@@ -29,5 +29,5 @@ build/Release
 # Dependency directory
 node_modules
 
-#Directories
+# Build directory
 public
