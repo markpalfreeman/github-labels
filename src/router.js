@@ -57,7 +57,14 @@ export default Router.extend({
       url: `http://github-labels.herokuapp.com/authenticate/${code}`,
       json: true
     }, (err, req, body) => {
-      console.log(body)
+      if (err) {
+        console.error('something went wrong!')
+      } else {
+        // attach 'token' to Me object
+        app.me.token = body.token
+        // .. and re-direct back to /repos page
+        this.redirectTo('./repos')
+      }
     })
   }
 
