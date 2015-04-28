@@ -1,7 +1,8 @@
 import app from 'ampersand-app'
 import React from 'react'
 import Router from 'ampersand-router'
-import qs from 'qs'
+import qs from 'qs' // string route parsing
+import xhr from 'xhr' // ajax requests from the server
 
 import PublicPage from './pages/public'
 import ReposPage from './pages/repos'
@@ -51,7 +52,13 @@ export default Router.extend({
   authCallback () {
     const code = qs.parse(window.location.search.slice(1)).code
 
-    console.log(code)
+    // ajax request for authentication
+    xhr({
+      url: `http://github-labels.herokuapp.com/authenticate/${code}`,
+      json: true
+    }, (err, req, body) => {
+      console.log(body)
+    })
   }
 
 })
