@@ -2,7 +2,7 @@
   "name": "hubtags-demo",
   "version": "0.1.0",
   "description": "Walkthrough of henrik joreteg's HubTags.com web app tutorial",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "deploy": "surge -p public -d github-labels.surge.sh",
     "prebuild": "rm -rf public && mkdir public",
@@ -28,6 +28,7 @@
     "file-loader": "^0.8.1",
     "hjs-webpack": "^1.8.0",
     "local-links": "^1.4.0",
+    "qs": "^2.4.1",
     "react": "^0.13.2",
     "react-hot-loader": "^1.2.5",
     "style-loader": "^0.11.0",

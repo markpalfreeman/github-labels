@@ -1,16 +1,16 @@
 import app from 'ampersand-app'
 import React from 'react'
 import Router from 'ampersand-router'
-import Layout from './layout'
+import qs from 'qs'
 
-// require all pages
 import PublicPage from './pages/public'
 import ReposPage from './pages/repos'
 import RepoDetail from './pages/repo-detail'
 
+import Layout from './layout'
 
 export default Router.extend({
-  renderPage(Page, options) {
+  renderPage (Page, options) {
     const Main = (
       <Layout>
         <Page {...options}/>
@@ -23,18 +23,35 @@ export default Router.extend({
   routes: {
     '': 'public',
     'repos': 'repos',
-    'repo-detail': 'repoDetail'
+    'repo-detail': 'repoDetail',
+    'login': 'login',
+    'auth/callback': 'authCallback'
   },
 
-  public() {
-    React.render(<PublicPage />, document.body)
+  public () {
+    React.render(<PublicPage/>, document.body)
   },
 
-  repos() {
+  repos () {
     this.renderPage(ReposPage)
   },
 
   repoDetail () {
     this.renderPage(RepoDetail)
+  },
+
+  login () {
+    window.location = 'https://github.com/login/oauth/authorize?' + qs.stringify({
+      scope: 'user,repo',
+      redirect_uri: location.origin + '/auth/callback',
+      client_id: '8664788590e862665fdb'
+    })
+  },
+
+  authCallback () {
+    const code = qs.parse(window.location.search.slice(1)).code
+
+    console.log(code)
   }
+
 })

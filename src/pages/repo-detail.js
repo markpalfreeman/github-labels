@@ -2,7 +2,6 @@ import React from 'react'
 
 export default React.createClass({
   displayName: 'RepoDetailPage',
-
   render() {
     return (
       <header className='container'>
