@@ -4,19 +4,21 @@ import Model from 'ampersand-model'
 import cacheMixin from 'ampersand-local-cache-mixin' // use LocalStorage
 import ms from 'milliseconds'
 import githubMixin from '../helpers/github-mixin'
+import RepoCollection from './repo-collection'
 
 export default Model.extend(githubMixin, cacheMixin, {
   url: 'https://api.github.com/user',
 
   // Cache auth tokens
   initialize () {
+    // attempt to read from storage
     this.initStorage({
       storageKey: 'me',
       ttl: ms.days(30),
       tts: ms.minutes(1)
     })
     // Write to localStorage if token changes / fetch if stale
-    this.on('stale', this.fetch, this)
+    this.on('stale', this.onStale, this)
     this.on('change', this.writeToStorage, this)
     this.on('change:loggedIn', this.onLoggedInChange, this)
   },
@@ -36,9 +38,24 @@ export default Model.extend(githubMixin, cacheMixin, {
     }
   },
 
+  collections: {
+    repos: RepoCollection
+  },
+
+  onStale () {
+    if (this.loggedIn) {
+      this.fetchAll()
+    }
+  },
+
+  fetchAll () {
+    this.fetch()
+    this.repos.fetch()
+  },
+
   onLoggedInChange () {
     if (this.loggedIn) {
-      this.fetch()
+      this.fetchAll()
     } else {
       window.localStorage.clear()
     }

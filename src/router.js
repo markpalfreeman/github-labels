@@ -10,10 +10,20 @@ import RepoDetail from './pages/repo-detail'
 
 import Layout from './layout'
 
+function auth (name) {
+  return function () {
+    if (app.me.loggedIn) {
+      this[name].apply(this, arguments)
+    } else {
+      this.redirectTo('/')
+    }
+  }
+}
+
 export default Router.extend({
   renderPage (Page, options) {
     const Main = (
-      <Layout>
+      <Layout me={app.me}>
         <Page {...options}/>
       </Layout>
     )
@@ -23,9 +33,10 @@ export default Router.extend({
 
   routes: {
     '': 'public',
-    'repos': 'repos',
-    'repo-detail': 'repoDetail',
+    'repos': auth('repos'),
+    'repo-detail': auth('repoDetail'),
     'login': 'login',
+    'logout': 'logout',
     'auth/callback': 'authCallback'
   },
 
@@ -34,7 +45,7 @@ export default Router.extend({
   },
 
   repos () {
-    this.renderPage(ReposPage)
+    this.renderPage(ReposPage, {repos: app.me.repos})
   },
 
   repoDetail () {
@@ -47,6 +58,11 @@ export default Router.extend({
       redirect_uri: location.origin + '/auth/callback',
       client_id: '8664788590e862665fdb'
     })
+  },
+
+  logout () {
+    app.me.clear()
+    this.redirectTo('/')
   },
 
   authCallback () {
