@@ -34,7 +34,7 @@ export default Router.extend({
   routes: {
     '': 'public',
     'repos': auth('repos'),
-    'repo-detail': auth('repoDetail'),
+    'repos/:owner/:reponame': auth('repoDetail'),
     'login': 'login',
     'logout': 'logout',
     'auth/callback': 'authCallback'
@@ -48,8 +48,9 @@ export default Router.extend({
     this.renderPage(ReposPage, {repos: app.me.repos})
   },
 
-  repoDetail () {
-    this.renderPage(RepoDetail)
+  repoDetail (owner, reponame) {
+    const repo = app.me.repos.getByFullName(owner + '/' + reponame)
+    this.renderPage(RepoDetail, {repo: repo})
   },
 
   login () {
