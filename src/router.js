@@ -50,7 +50,7 @@ export default Router.extend({
 
   repoDetail (owner, reponame) {
     const repo = app.me.repos.getByFullName(owner + '/' + reponame)
-    this.renderPage(RepoDetail, {repo: repo})
+    this.renderPage(RepoDetail, {repo: repo, labels: repo.labels})
   },
 
   login () {
