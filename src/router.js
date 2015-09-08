@@ -1,88 +1,96 @@
 import app from 'ampersand-app'
 import React from 'react'
 import Router from 'ampersand-router'
-import qs from 'qs' // string route parsing
-import xhr from 'xhr' // ajax requests from the server
-
+import qs from 'qs'
+import uuid from 'node-uuid'
+import xhr from 'xhr'
 import PublicPage from './pages/public'
 import ReposPage from './pages/repos'
-import RepoDetail from './pages/repo-detail'
-
+import RepoDetailPage from  './pages/repo-detail'
 import Layout from './layout'
-
-function auth (name) {
-  return function () {
-    if (app.me.loggedIn) {
-      this[name].apply(this, arguments)
-    } else {
-      this.redirectTo('/')
-    }
-  }
-}
+import MessagePage from './pages/message'
+import config from './config'
 
 export default Router.extend({
-  renderPage (Page, options) {
-    const Main = (
-      <Layout me={app.me}>
-        <Page {...options}/>
-      </Layout>
-    )
-
-    React.render(Main, document.body)
-  },
 
   routes: {
     '': 'public',
-    'repos': auth('repos'),
-    'repos/:owner/:reponame': auth('repoDetail'),
+    'repos': 'repos',
     'login': 'login',
     'logout': 'logout',
-    'auth/callback': 'authCallback'
+    'repo/:user/:name': 'repoDetail',
+    'auth/callback?:query': 'authCallBack',
+    '*fourOhFour': 'fourOhFour'
+  },
+
+  renderPage (page, opts = {layout: true}) {
+    if (opts.layout) {
+      page = (
+        <Layout me={app.me}>
+          {page}
+        </Layout>
+      )
+    }
+
+    React.render(page, document.body)
   },
 
   public () {
-    React.render(<PublicPage/>, document.body)
+    this.renderPage(<PublicPage/>, {layout: false})
   },
 
   repos () {
-    this.renderPage(ReposPage, {repos: app.me.repos})
+    this.renderPage(<ReposPage repos={app.me.repos}/>)
   },
 
-  repoDetail (owner, reponame) {
-    const repo = app.me.repos.getByFullName(owner + '/' + reponame)
-    this.renderPage(RepoDetail, {repo: repo, labels: repo.labels})
+  repoDetail (user, name) {
+    const repo = app.me.repos.getByFullName(user + '/' + name)
+    this.renderPage(<RepoDetailPage repo={repo} labels={repo.labels}/>)
   },
 
   login () {
+    const state = uuid()
+    window.localStorage.state = state
+
     window.location = 'https://github.com/login/oauth/authorize?' + qs.stringify({
+      client_id: config.clientId,
+      redirect_uri: window.location.origin + '/auth/callback',
       scope: 'user,repo',
-      redirect_uri: location.origin + '/auth/callback',
-      client_id: '8664788590e862665fdb'
+      state: state
     })
   },
 
   logout () {
-    app.me.clear()
-    this.redirectTo('/')
+    window.localStorage.clear()
+    window.location = '/'
   },
 
-  authCallback () {
-    const code = qs.parse(window.location.search.slice(1)).code
+  fourOhFour () {
+    this.renderPage(<MessagePage title='Page not found.'/>)
+  },
 
-    // ajax request for authentication
-    xhr({
-      url: `http://github-labels.herokuapp.com/authenticate/${code}`,
-      json: true
-    }, (err, req, body) => {
-      if (err) {
-        console.error('something went wrong!')
-      } else {
-        // attach 'token' to Me object
-        app.me.token = body.token
-        // .. and re-direct back to /repos page
-        this.redirectTo('./repos')
-      }
-    })
+  authCallBack (query) {
+    query = qs.parse(query)
+
+    if (query.state === window.localStorage.state) {
+      delete localStorage.state
+
+      xhr({
+        url: config.gatekeeperUrl + '/' + query.code,
+        json: true
+      }, (err, resp, body) => {
+
+        if (err) {
+          console.log('cannot authenticate')
+        } else {
+          app.me.token = body.token
+          this.redirectTo('/repos')
+        }
+
+      })
+
+      this.renderPage(<MessagePage title='Fetching your GitHub repos ...'/>)
+    }
   }
 
 })

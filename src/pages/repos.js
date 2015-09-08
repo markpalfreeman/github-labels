@@ -6,21 +6,25 @@ export default React.createClass({
 
   displayName: 'ReposPage',
 
-  render() {
+  render () {
     const {repos} = this.props
 
     return (
-      <header className='container'>
-        <h1>Repos</h1>
+      <div>
+        <h1>Repos:</h1>
 
         {repos.map((repo) => {
           return (
-            <div key={repo.id}>
-              <a href={repo.appUrl}>{repo.name}</a>
+            <div key={repo.id}> 
+              <a href={repo.app_url}>
+                <span className='octicon octicon-repo'></span> {repo.full_name}
+              </a> 
             </div>
           )
         })}
-      </header>
+      </div>
     )
+
   }
+
 })

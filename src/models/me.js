@@ -1,63 +1,39 @@
-// 'Me' is a model created to persist secret Tokens for authentication
-
 import Model from 'ampersand-model'
-import cacheMixin from 'ampersand-local-cache-mixin' // use LocalStorage
-import ms from 'milliseconds'
-import githubMixin from '../helpers/github-mixin'
 import RepoCollection from './repo-collection'
+import githubMixin from '../helpers/github-mixin'
 
-export default Model.extend(githubMixin, cacheMixin, {
+export default Model.extend(githubMixin, {
   url: 'https://api.github.com/user',
 
-  // Cache auth tokens
   initialize () {
-    // attempt to read from storage
-    this.initStorage({
-      storageKey: 'me',
-      ttl: ms.days(30),
-      tts: ms.minutes(1)
-    })
-    // Write to localStorage if token changes / fetch if stale
-    this.on('stale', this.onStale, this)
-    this.on('change', this.writeToStorage, this)
-    this.on('change:loggedIn', this.onLoggedInChange, this)
+    this.token = window.localStorage.token
+    this.on('change:token', this.onChangeToken)
   },
 
   props: {
+    id: 'number',
     login: 'string',
-    token: 'string'
+    avatar_url: 'string'
   },
 
-  // derived property to return boolean
-  derived: {
-    loggedIn: {
-      deps: ['token'],
-      fn () {
-        return !!this.token
-      }
-    }
+  session: {
+    token: 'string'
   },
 
   collections: {
     repos: RepoCollection
   },
 
-  onStale () {
-    if (this.loggedIn) {
-      this.fetchAll()
-    }
+  onChangeToken () {
+    window.localStorage.token = this.token
+    this.fetchInitialData()
   },
 
-  fetchAll () {
-    this.fetch()
-    this.repos.fetch()
-  },
-
-  onLoggedInChange () {
-    if (this.loggedIn) {
-      this.fetchAll()
-    } else {
-      window.localStorage.clear()
+  fetchInitialData () {
+    if (this.token) {
+      this.fetch()
+      this.repos.fetch()
     }
   }
+
 })
