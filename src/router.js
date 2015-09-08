@@ -89,7 +89,7 @@ export default Router.extend({
 
       })
 
-      this.renderPage(<MessagePage title='Fetching your GitHub repos ...'/>)
+      this.renderPage(<MessagePage title='Fetching repos...'/>)
     }
   }
 

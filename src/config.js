@@ -1,4 +1,4 @@
-export default {
+const config = {
   'localhost': {
     clientId: '8664788590e862665fdb',
     gatekeeperUrl: 'https://github-labels-local.herokuapp.com/authenticate'
@@ -8,3 +8,5 @@ export default {
     gatekeeperUrl: 'https://github-labels.herokuapp.com/authenticate' 
   }
 }[window.location.hostname]
+
+export default config
